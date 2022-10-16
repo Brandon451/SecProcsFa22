@@ -2,25 +2,25 @@
 
 Cache Line Size:
 L1: 64
-L2:
-L3:
+L2: 64
+L3: 64
 
 Total Size:
-L1:
-L2:
-L3:
+L1: 32768 for DCache and 32768 for ICache
+L2: 262144
+L3: 8388608
 
 Number of Ways:
-L1:
-L2:
-L3:
+L1: 8
+L2: 8
+L3: 8
 
 Number of Sets:
-L1:
-L2:
-L3:
+L1: 64
+L2: 512
+L3: 16384
 
 Latency:
 L1:
-L2:
-L3:
+L2: 27
+L3: 255
