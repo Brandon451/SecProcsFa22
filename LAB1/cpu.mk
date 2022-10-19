@@ -1,5 +1,5 @@
 CC=gcc
 CFLAGS=-O0 -I /usr/local
-SENDER_CPU=6
+SENDER_CPU=3
 RECEIVER_CPU=7
 
