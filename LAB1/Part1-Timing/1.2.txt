@@ -13,14 +13,14 @@ L3: 8388608
 Number of Ways:
 L1: 8
 L2: 8
-L3: 8
+L3: 16
 
 Number of Sets:
 L1: 64
 L2: 512
-L3: 16384
+L3: 8192
 
 Latency:
-L1:
-L2: 27
-L3: 255
+L1: 4
+L2: 12
+L3: 30
