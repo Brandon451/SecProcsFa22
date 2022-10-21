@@ -1,10 +1,9 @@
-#include "util.h"
-
+#include"util.h"
 // mman library to be used for hugepage allocations (e.g. mmap or posix_memalign only)
 #include <sys/mman.h>
-#include <stdio.h>
 #include <time.h>
-
+#define SAMPLES 10
+ 
 uint64_t get_cache_set_index(ADDR_PTR phys_addr)
 {
     uint64_t mask = ((uint64_t) 1 << 15) - 1;
@@ -13,9 +12,8 @@ uint64_t get_cache_set_index(ADDR_PTR phys_addr)
 
 int main(int argc, char *argv[]) {
 
-	int set_id[8] = { 450, 100, 250, 180, 20, 90, 40, 8};
-
-	uint64_t eviction_set[8][8];		//Number of sets to probe * Number of ways
+ 	int set_id[8] = {200, 152, 124, 109, 65, 44, 31, 20};	//Index for each bit.
+ 	uint64_t eviction_set[8][8];          	//Number of sets to probe * number of ways
 
 	int n = 8;//CACHE_WAYS_L3;
     int o = 6;                          // log_2(64), where 64 is the line size
@@ -51,91 +49,65 @@ int main(int argc, char *argv[]) {
 		}
     }
 
-	// Put your covert channel setup code here
+ 	int binary[8] = {0, 0, 0, 0, 0, 0, 0, 0};	//Store 8 bit number`
+ 
+	//Prime L2
+	for (int index = 0; index < 8; index++) {
+          for (int way = 0; way < 8; way++){
+              uint64_t *temp_pointer = (uint64_t *) eviction_set[index][way];
+			  tmp = *temp_pointer;
+	    }
+   	}
 
-	for (int repeat=0; repeat < 1000; repeat++) {
-      for (int ind = 0; ind < 8; ind++) {
-		for (int way = 0; way < 8; way++){
-			uint64_t *temp_pointer = (uint64_t *) eviction_set[ind][way]; // cast x to a pointer (treat it as an address)
-			tmp = *temp_pointer; // access the data pointed to by pointer y.
-		}
-   }	
-}
+	//Added delay to let sender access data
+	start_time = clock();
+	current_time = start_time;
+	while (current_time - start_time < 10000000) current_time = clock();
 
-	//for (int way = 0; way < 8; way++){
-	//	int time = measure_one_block_access_time(eviction_set[ind][way]);
-	////	printf("Address: %d, Time for access: %d\n", way, time);
-	//}
-
-//	printf("Please press enter.\n");
-//
-    //char text_buf;
-	//fgets(text_buf, sizeof(text_buf), stdin);
-//    getchar();
-
-	//for (int way = 0; way < 8; way++){
-	//	int time = measure_one_block_access_time(eviction_set[ind][way]);
-	////	printf("Address: %d, Time for access: %d\n", way, time);
-	//}
-    
-    start_time = clock();
-
-    current_time = start_time;         
-	while (( current_time - start_time) < 10000000) {
-		current_time = clock();
-}
-
-printf("Prime is done\n");
-    start_time = clock();
-
-    current_time = start_time;         
-	while (( current_time - start_time) < 10000000) {
-		current_time = clock();
-}
-printf("Done waiting\n");
-//
-//	printf("Please press enter.\n");
-
-	//char text_buf[2];
-	//fgets(text_buf, sizeof(text_buf), stdin);
-
-//	printf("Please press enter.\n");
-   // input =  getchar();
-//    getchar();
-//	for (int way = 0; way < 8; way++){
-//		int time = measure_one_block_access_time(eviction_set[ind][way]);
-//	//	printf("Address: %d, Time for access: %d\n", way, time);
-//	}
-	//printf("Receiver now listening.\n");
-   size_t msg_len = 8;  
+	//Probe L2
+	char ch;
 	bool listening = true;
-    start_time = clock();
 
-    current_time = start_time;         
-
-	//while (listening && (current_time - start_time) < 10000000) {
-	while (listening) {
-
-      for (int ind = 0; ind < 4; ind++) {
-		// Put your covert channel code here
+	for (int index = 0; index < 8; index++) {
 		for (int way = 0; way < 8; way++){
-			int time = measure_one_block_access_time(eviction_set[ind][way]);
-         printf("Address: %d, Time for access: %d for set %d is\n", way, time, ind);
-			//uint64_t *temp_pointer = (uint64_t *) eviction_set[ind][way]; // cast x to a pointer (treat it as an address)
-			//tmp = *temp_pointer; // access the data pointed to by pointer y.
-
-    current_time = clock();         
-           listening = false;
-}
+        	start_time = clock();
+            current_time = start_time;
+	    	while (current_time - start_time < 200) {
+            	int time = measure_one_block_access_time(eviction_set[index][way]);
+	    
+	  			// if (time < 700) {
+            	if (time > 60) {
+             		//misses[ind][way]++;
+	     			binary[index] = 1;
+	    		}
+	   			//}	    
+	    		else;
+  				current_time = clock();      
+      		}		    
 		}
-	        //getch();
-
-	//listening = false;
-
 	}
 
-	printf("Receiver finished.\n");
+	int secret_zero = 1;
+	//Find the binary number based on time threshold calculation
+  	for (int i = 1; i < 8; i++) {
+    	if (binary[i]) secret_zero = 0;  
+  	}
 
+	if(secret_zero == 1) printf("Secret number: 0\n");
+	else {
+		int num = 0;
+		int pow_2 = 1;
+		for (int i = 0; i < 8; i++) {
+			num += binary[i] * pow_2;
+			pow_2 = 2 * pow_2;	
+			//printf("Power of 2 is %d and binary number is %d\n", pow_2, binary[i]); 
+		}
+		printf("Secret number: %d\n", num);
+	}
+  	printf("Receiver finished.\n");
+	
 	return 0;
+  
 }
+
 
