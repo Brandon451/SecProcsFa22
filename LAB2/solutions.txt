@@ -1,0 +1,5 @@
+*Discussion Question 1*: How many addresses need to be flushed at the first step?
+I flushed 256 addresses in the first part as there are 256 pages initialized in the kernel. As the secret value from the kernel is an ASCII coded string, we can get away with flushing 94 pages (page numbers: 33-126).
+
+*Discussion Question 2*: Now assume the attacker and victim no longer share a memory region. Would your attack still work? If not, changes could you need to make to make it work?
+ One of the main requirements of Flush+Reload attack is shared memory and hence, this attack does not work without shared memory. If there is no shared memory we need to move on to Prime+Probe attack.
