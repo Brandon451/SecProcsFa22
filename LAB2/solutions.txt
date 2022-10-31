@@ -3,3 +3,9 @@ I flushed 256 addresses in the first part as there are 256 pages initialized in 
 
 *Discussion Question 2*: Now assume the attacker and victim no longer share a memory region. Would your attack still work? If not, changes could you need to make to make it work?
  One of the main requirements of Flush+Reload attack is shared memory and hence, this attack does not work without shared memory. If there is no shared memory we need to move on to Prime+Probe attack.
+
+*Discussion Question 3*: In our example, the attacker tries to leak the values in the array secret_part2. In a real-world attack, people can use Spectre to leak arbitrary values in the victim’s address space. Explain how the attacker can achieve this.
+This is done by finidng code that does computation based on this data. If the bit is set to 1 computation is done which leads to misses in the cache (detected using side channel attacks), else no cache evictions are observed which indicates that the value of the bit is 0.
+
+*Discussion Question 4*: Try to tune the training parameters and answer this question: What is the fewest number of times you need to train the branch on line 9 in Listing 3 to make the attack work?
+Works with training the branch once.

